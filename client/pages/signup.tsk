@@ -1,0 +1,81 @@
+import { useState } from "react";
+import axios from "axios";
+import AvatarCarousel from "../components/AvatarCarousel";
+import Loader from "../components/Loader";
+
+export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/register", {
+        username,
+        email,
+        password,
+        avatar,
+      });
+      setSuccess(res.data.message);
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setAvatar("");
+    } catch (err: any) {
+      setError(err.response?.data.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      {loading && <Loader />}
+      <h1 className="text-4xl mb-6 text-blue-400">Sign Up</h1>
+      <form className="flex flex-col gap-4 w-80" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="p-2 rounded bg-gray-800 focus:outline-none"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="p-2 rounded bg-gray-800 focus:outline-none"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password (min 8 chars)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="p-2 rounded bg-gray-800 focus:outline-none"
+          required
+        />
+        <AvatarCarousel selected={avatar} setSelected={setAvatar} />
+        {error && <p className="text-red-500">{error}</p>}
+        {success && <p className="text-green-500">{success}</p>}
+        <button
+          type="submit"
+          className="bg-blue-400 text-black p-2 rounded mt-2"
+        >
+          Sign Up
+        </button>
+      </form>
+    </div>
+  );
+}
